@@ -24,6 +24,12 @@ void TimerOs(void);
  */
 void CycleOs(void);
 
+/**
+ * @brief Dispatch idle-time work. Called by the caller's scheduling loop whenever time was left
+ *        over in the current 1ms budget after TimerOs (and, if due, CycleOs) ran.
+ */
+void IdleOs(void);
+
 #ifdef __cplusplus
 }
 #endif

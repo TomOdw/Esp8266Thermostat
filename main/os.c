@@ -1,6 +1,7 @@
 #include "os.h"
 
 #include "ana_in.h"
+#include "curve.h"
 #include "dig_out.h"
 #include "nvs_store.h"
 #include "thermostat.h"
@@ -14,6 +15,7 @@ void InitOs(void)
   InitDigOut();
   InitWifiAp();
   StartWifiAp();
+  InitCurve();
   InitThermostat();
   InitWebpage();
 }
@@ -30,4 +32,9 @@ void CycleOs(void)
   CycleAnaIn();
   CycleDigOut();
   CycleThermostat();
+}
+
+void IdleOs(void)
+{
+  /* Reserved for future idle-priority work. */
 }

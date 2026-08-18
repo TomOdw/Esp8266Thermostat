@@ -21,6 +21,12 @@ typedef enum
 } ENUM_ANA_IN;
 
 /**
+ * @brief Nominal ESP32 ADC full-scale voltage at ADC_ATTEN_DB_12, corresponding to UINT16_MAX.
+ *        Shared by any module that needs to convert a Read/ReadFiltered digit value to/from Volts.
+ */
+#define ANA_IN_VMAX_VOLTS 3.3f
+
+/**
  * @brief Configure the ADC unit/channel(s) used for the analog inputs.
  */
 void InitAnaIn(void);

@@ -13,12 +13,16 @@ static const char *GetKeyForParam(ENUM_NVS_PARAM eParam)
 {
   switch (eParam)
   {
-    case NVS_PARAM_THERMOSTAT_LOW:
-      return "low";
-    case NVS_PARAM_THERMOSTAT_HIGH:
-      return "high";
+    case NVS_PARAM_THERMOSTAT_OFF:
+      return "off";
+    case NVS_PARAM_THERMOSTAT_ON:
+      return "on";
     case NVS_PARAM_AP_NAME:
       return "apname";
+    case NVS_PARAM_CURVE:
+      return "curve";
+    case NVS_PARAM_DIG_OUT_INVERT:
+      return "invert";
     default:
       return NULL;
   }
@@ -42,6 +46,7 @@ void InitNvs(void)
 esp_err_t ReadNvs(ENUM_NVS_PARAM eParam, void *pvValue, uint32_t u32Size)
 {
   const char *pcKey = GetKeyForParam(eParam);
+  size_t u32Required = u32Size;
 
   if (pcKey == NULL)
   {
@@ -50,11 +55,10 @@ esp_err_t ReadNvs(ENUM_NVS_PARAM eParam, void *pvValue, uint32_t u32Size)
 
   if (eParam == NVS_PARAM_AP_NAME)
   {
-    size_t u32Required = u32Size;
     return nvs_get_str(s_xNvsHandle, pcKey, (char *) pvValue, &u32Required);
   }
 
-  return nvs_get_u16(s_xNvsHandle, pcKey, (uint16_t *) pvValue);
+  return nvs_get_blob(s_xNvsHandle, pcKey, pvValue, &u32Required);
 }
 
 esp_err_t WriteNvs(ENUM_NVS_PARAM eParam, const void *pvValue, uint32_t u32Size)
@@ -73,7 +77,7 @@ esp_err_t WriteNvs(ENUM_NVS_PARAM eParam, const void *pvValue, uint32_t u32Size)
   }
   else
   {
-    eErr = nvs_set_u16(s_xNvsHandle, pcKey, *(const uint16_t *) pvValue);
+    eErr = nvs_set_blob(s_xNvsHandle, pcKey, pvValue, u32Size);
   }
 
   if (eErr != ESP_OK)

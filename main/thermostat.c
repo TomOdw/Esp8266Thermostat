@@ -1,35 +1,36 @@
 #include "thermostat.h"
 
 #include "ana_in.h"
+#include "curve.h"
 #include "dig_out.h"
 #include "nvs_store.h"
 
-/* Placeholder defaults, in the same 0..UINT16_MAX scale as ReadAnaInFiltered. Tune to the sensor in use. */
-#define THERMOSTAT_DEFAULT_LOW 20000
-#define THERMOSTAT_DEFAULT_HIGH 45000
+/* Placeholder defaults in DegC. Tune to the sensor/curve in use. */
+#define THERMOSTAT_DEFAULT_OFF_C 18.0f
+#define THERMOSTAT_DEFAULT_ON_C 22.0f
 
-static volatile uint16_t s_u16ThresholdLow;
-static volatile uint16_t s_u16ThresholdHigh;
+static volatile float s_fThresholdOffC;
+static volatile float s_fThresholdOnC;
 
 void InitThermostat(void)
 {
-  uint16_t u16Low;
-  uint16_t u16High;
+  float fOffC;
+  float fOnC;
 
-  if (ReadNvs(NVS_PARAM_THERMOSTAT_LOW, &u16Low, sizeof(u16Low)) != ESP_OK)
+  if (ReadNvs(NVS_PARAM_THERMOSTAT_OFF, &fOffC, sizeof(fOffC)) != ESP_OK)
   {
-    u16Low = THERMOSTAT_DEFAULT_LOW;
-    WriteNvs(NVS_PARAM_THERMOSTAT_LOW, &u16Low, sizeof(u16Low));
+    fOffC = THERMOSTAT_DEFAULT_OFF_C;
+    WriteNvs(NVS_PARAM_THERMOSTAT_OFF, &fOffC, sizeof(fOffC));
   }
 
-  if (ReadNvs(NVS_PARAM_THERMOSTAT_HIGH, &u16High, sizeof(u16High)) != ESP_OK)
+  if (ReadNvs(NVS_PARAM_THERMOSTAT_ON, &fOnC, sizeof(fOnC)) != ESP_OK)
   {
-    u16High = THERMOSTAT_DEFAULT_HIGH;
-    WriteNvs(NVS_PARAM_THERMOSTAT_HIGH, &u16High, sizeof(u16High));
+    fOnC = THERMOSTAT_DEFAULT_ON_C;
+    WriteNvs(NVS_PARAM_THERMOSTAT_ON, &fOnC, sizeof(fOnC));
   }
 
-  s_u16ThresholdLow = u16Low;
-  s_u16ThresholdHigh = u16High;
+  s_fThresholdOffC = fOffC;
+  s_fThresholdOnC = fOnC;
 }
 
 void TimerThermostat(void)
@@ -39,34 +40,34 @@ void TimerThermostat(void)
 
 void CycleThermostat(void)
 {
-  uint16_t u16Value = ReadAnaInFiltered(ANA_IN_0);
+  float fTempC = GetCurveTemperature(ReadAnaInFiltered(ANA_IN_0));
 
-  if (u16Value >= s_u16ThresholdHigh)
+  if (fTempC >= s_fThresholdOnC)
   {
     WriteDigOut(DIG_OUT_0, true);
   }
-  else if (u16Value <= s_u16ThresholdLow)
+  else if (fTempC <= s_fThresholdOffC)
   {
     WriteDigOut(DIG_OUT_0, false);
   }
   /* Else: within the hysteresis band, leave the output unchanged. */
 }
 
-uint16_t GetThermostatLowThreshold(void)
+float GetThermostatOffThresholdC(void)
 {
-  return s_u16ThresholdLow;
+  return s_fThresholdOffC;
 }
 
-uint16_t GetThermostatHighThreshold(void)
+float GetThermostatOnThresholdC(void)
 {
-  return s_u16ThresholdHigh;
+  return s_fThresholdOnC;
 }
 
-void SetThermostatThresholds(uint16_t u16Low, uint16_t u16High)
+void SetThermostatThresholds(float fOffC, float fOnC)
 {
-  s_u16ThresholdLow = u16Low;
-  s_u16ThresholdHigh = u16High;
+  s_fThresholdOffC = fOffC;
+  s_fThresholdOnC = fOnC;
 
-  WriteNvs(NVS_PARAM_THERMOSTAT_LOW, &u16Low, sizeof(u16Low));
-  WriteNvs(NVS_PARAM_THERMOSTAT_HIGH, &u16High, sizeof(u16High));
+  WriteNvs(NVS_PARAM_THERMOSTAT_OFF, &fOffC, sizeof(fOffC));
+  WriteNvs(NVS_PARAM_THERMOSTAT_ON, &fOnC, sizeof(fOnC));
 }

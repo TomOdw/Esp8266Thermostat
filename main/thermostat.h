@@ -1,11 +1,9 @@
 /**
  * @file thermostat.h
- * @brief Hysteresis control of the digital output based on the filtered analog input.
+ * @brief Hysteresis control of the digital output based on the curve-derived temperature.
  */
 
 #pragma once
-
-#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,26 +25,26 @@ void TimerThermostat(void);
 void CycleThermostat(void);
 
 /**
- * @brief Get the currently active low threshold.
+ * @brief Get the threshold at/below which the output turns off.
  *
- * @return Threshold, scaled to 0..UINT16_MAX.
+ * @return Threshold in DegC.
  */
-uint16_t GetThermostatLowThreshold(void);
+float GetThermostatOffThresholdC(void);
 
 /**
- * @brief Get the currently active high threshold.
+ * @brief Get the threshold at/above which the output turns on.
  *
- * @return Threshold, scaled to 0..UINT16_MAX.
+ * @return Threshold in DegC.
  */
-uint16_t GetThermostatHighThreshold(void);
+float GetThermostatOnThresholdC(void);
 
 /**
  * @brief Set and persist new hysteresis thresholds.
  *
- * @param u16Low New low threshold, scaled to 0..UINT16_MAX.
- * @param u16High New high threshold, scaled to 0..UINT16_MAX.
+ * @param fOffC New off threshold in DegC (output turns off at/below this).
+ * @param fOnC New on threshold in DegC (output turns on at/above this).
  */
-void SetThermostatThresholds(uint16_t u16Low, uint16_t u16High);
+void SetThermostatThresholds(float fOffC, float fOnC);
 
 #ifdef __cplusplus
 }

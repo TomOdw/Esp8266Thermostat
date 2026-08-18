@@ -44,12 +44,27 @@ void CycleDigOut(void);
 void WriteDigOut(ENUM_DIG_OUT eDigOut, bool xState);
 
 /**
- * @brief Read back the last state written to a digital output.
+ * @brief Read back the last logical state written to a digital output (before polarity inversion).
  *
  * @param eDigOut Channel to read.
- * @return true if high, false if low.
+ * @return true if logically on, false if logically off.
  */
 bool ReadDigOut(ENUM_DIG_OUT eDigOut);
+
+/**
+ * @brief Get whether output polarity is currently inverted.
+ *
+ * @return true if inverted (e.g. for an active-low relay), false for normal polarity.
+ */
+bool GetDigOutInvert(void);
+
+/**
+ * @brief Set and persist output polarity inversion. Immediately re-applies the already-written
+ *        logical state of every channel to its GPIO under the new polarity.
+ *
+ * @param xInvert true to invert (e.g. for an active-low relay), false for normal polarity.
+ */
+void SetDigOutInvert(bool xInvert);
 
 #ifdef __cplusplus
 }
